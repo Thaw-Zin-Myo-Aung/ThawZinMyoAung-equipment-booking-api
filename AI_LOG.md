@@ -12,6 +12,7 @@
 | 5 | "Create a Postman collection" | Postman collection (19 requests with test scripts, auto-captured booking ids) + environment file | Imported and ran it in Postman, and took the screenshots in `evidence/screenshots/` |
 | 6 | Quality Gate + curl guide released → "fix the code first" | v2 fixes: JSON body parsing, `notFound`/`onError`, `requireText`, strict ISO dates, PATCH validation, atomic overlap SQL; curl test script `tests/run_tests.sh` | Before/after runs: v1 16 pass / 4 fail → v2 26 pass / 0 fail. Re-ran all Postman requests on v2 (all expected statuses). |
 | 7 | 404 vs 400 for an unknown `equipmentId` | AI kept v1's 404 and pointed out that my first reasoning talked about IDs in the **URL path**, while here the id is in the **request body** | **My decision:** keep 404. *(reason in my own words below)* |
+| 8 | "We use GitHub and must deploy to Cloudflare" | Steps to create the remote D1 database, set its id in `wrangler.toml`, run the remote migration and deploy. Also noticed that the new database id left the local dev database empty (local 500), and re-ran the local migration. | I ran `wrangler login` and authorised it in the browser myself. Live suite: 26 pass / 0 fail ([deployed_cloudflare.txt](evidence/deployed_cloudflare.txt)). Pushed to my GitHub repo using my own SSH key. |
 
 ## Where I did not just accept the AI output
 

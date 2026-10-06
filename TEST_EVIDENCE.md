@@ -1,6 +1,8 @@
 # Test Evidence
 
-**Base URL used for testing:** `http://localhost:8787/api` (local `wrangler dev`, local D1)
+**Base URLs used for testing:**
+- Local: `http://localhost:8787/api` (`wrangler dev`, local D1). Used for the Postman screenshots and the before/after runs.
+- **Live: `https://equipment-booking-api.platformdev.workers.dev/api`** (Cloudflare Workers + remote D1). Full curl suite: **26 passed, 0 failed**, see [evidence/deployed_cloudflare.txt](evidence/deployed_cloudflare.txt).
 **Tools:** Postman (collection in [postman/](postman/)) and `curl` (script [tests/run_tests.sh](tests/run_tests.sh), based on the cURL Quick Test Guide)
 
 ## 1. Postman screenshots (v2)
@@ -37,6 +39,7 @@ Every Postman request also runs automated tests: the status code, the `{ "error"
 |---|---|---|---|
 | Before | v1 (commit `04dc9d3`) | **16 passed, 4 failed** | [evidence/before_v1.txt](evidence/before_v1.txt) |
 | After | v2 (commit `2694442`) | **26 passed, 0 failed** | [evidence/after_v2.txt](evidence/after_v2.txt) |
+| Live | v2 deployed to Cloudflare | **26 passed, 0 failed** | [evidence/deployed_cloudflare.txt](evidence/deployed_cloudflare.txt) |
 
 Cases that failed on v1:
 

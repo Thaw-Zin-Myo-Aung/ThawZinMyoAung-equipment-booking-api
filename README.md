@@ -3,7 +3,12 @@
 Backend REST API for booking shared equipment (projectors, cameras, rooms) without overlapping times.
 Built with **TypeScript + Hono** on **Cloudflare Workers (Wrangler)** with a **local D1 (SQLite)** database.
 
-**Base URL:** `http://localhost:8787/api`
+| | Base URL |
+|---|---|
+| **Live (Cloudflare Workers + D1)** | **https://equipment-booking-api.platformdev.workers.dev/api** |
+| Local (`wrangler dev`) | `http://localhost:8787/api` |
+
+Quick check: https://equipment-booking-api.platformdev.workers.dev/api/equipment
 
 ## Run
 
@@ -19,12 +24,23 @@ To reset the database, stop the server, delete the `.wrangler/` folder, then run
 
 > Windows PowerShell: if `npm` is blocked with "running scripts is disabled", use `npm.cmd run ...`.
 
+## Deploy (Cloudflare)
+
+```bash
+npx wrangler login         # once, in the browser
+npm run db:migrate:remote  # create tables + seed equipment in the remote D1 database
+npm run deploy             # publishes to *.workers.dev
+```
+
+The D1 database `booking-db` (APAC) is configured in [wrangler.toml](wrangler.toml).
+
 ## Test
 
 With the server running:
 
 - **curl:** `bash tests/run_tests.sh evidence/after_v2.txt` (Git Bash). This runs the cURL Quick Test Guide steps 1–9 plus edge cases and prints PASS/FAIL for each.
-- **Postman:** import [postman/booking-api.postman_collection.json](postman/booking-api.postman_collection.json) (and optionally the environment file), then use **Run collection**.
+  To test the live API: `BASE_URL=https://equipment-booking-api.platformdev.workers.dev/api bash tests/run_tests.sh`
+- **Postman:** import [postman/booking-api.postman_collection.json](postman/booking-api.postman_collection.json) and an environment: `booking-api.postman_environment.json` (local) or `booking-api-cloudflare.postman_environment.json` (live). Then use **Run collection**.
 
 Results and screenshots: [TEST_EVIDENCE.md](TEST_EVIDENCE.md)
 

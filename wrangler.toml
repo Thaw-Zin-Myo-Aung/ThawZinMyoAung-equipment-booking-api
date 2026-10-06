@@ -5,5 +5,5 @@ compatibility_date = "2026-10-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "booking-db"
-database_id = "local-booking-db"
+database_id = "5dac6db7-8dde-495e-9d8f-06ac8b0e9659"
 migrations_dir = "migrations"
