@@ -1,3 +1,6 @@
 node_modules/
 .wrangler/
 .dev.vars
+# Postman local-workspace scaffolding (created by the Postman app, not part of the submission)
+postman/.postman/
+postman/postman/

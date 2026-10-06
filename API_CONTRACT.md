@@ -45,7 +45,20 @@ All request and response bodies are JSON (`Content-Type: application/json`).
 }
 ```
 
-POST: all five fields are required. PATCH: send any subset.
+POST: all five fields are required. PATCH: send any subset, but at least one field.
+
+### Validation rules
+
+| Field | Rule |
+|---|---|
+| `equipmentId` | non-empty string, max 50 chars, must exist in `equipment` (otherwise **404**) |
+| `borrowerName` | non-empty string (after trimming), max 100 chars |
+| `purpose` | non-empty string (after trimming), max 500 chars |
+| `startAt`, `endAt` | ISO-8601 date-time **with timezone** (`Z` or `+07:00`) and a real calendar date (Feb 30 is rejected). Stored and returned as UTC `...Z` |
+| `startAt` / `endAt` together | `startAt < endAt`; for PATCH this is checked on the merged booking |
+| overlap | no other booking for the same equipment with `existing.startAt < endAt AND existing.endAt > startAt` (otherwise **409**) |
+
+Text values are trimmed before saving. Unknown extra fields are ignored. The body must be a JSON object, otherwise **400**.
 
 ### Booking response
 
@@ -67,6 +80,7 @@ Every error is JSON: `{ "error": "message" }`
 
 | Status | When | Why this code |
 |---:|---|---|
-| 400 | Missing field, invalid date, `startAt >= endAt` | The client sent data that is invalid on its own; it must fix the request. |
-| 404 | Booking `:id` not found; `equipmentId` does not exist | The resource the request refers to does not exist. |
-| 409 | Time overlaps another booking of the same equipment | The request is valid, but it conflicts with the current state of the server. |
+| 400 | Malformed JSON, missing field, wrong type, blank text, invalid/impossible date, `startAt >= endAt`, empty PATCH | The data is invalid **by itself**; the client must fix the request before it can succeed. |
+| 404 | Booking `:id` not found; `equipmentId` does not exist; unknown route | The request is valid, but the resource it refers to does not exist. An unknown `equipmentId` is reported as 404, not 400, because the value is well-formed and only the referenced equipment is missing. |
+| 409 | Time overlaps another booking of the same equipment | The request is valid, but it conflicts with the current state of the server (another booking). The same request could succeed later if that booking is deleted. |
+| 500 | Unexpected server error | Generic message only; details are logged on the server. |
