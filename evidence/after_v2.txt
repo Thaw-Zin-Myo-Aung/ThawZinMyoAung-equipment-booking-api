@@ -1,0 +1,309 @@
+Base URL: http://localhost:8787/api   Run at: 2026-10-06T07:12:51Z
+==================================================================
+[PASS] 1. List equipment  (expected 200, got 200)
+$ curl http://localhost:8787/api/equipment
+------------------------------------------------------------------
+HTTP/1.1 200 OK
+Content-Length: 199
+Content-Type: application/json
+
+[{"id":"eq-1","name":"Projector A","location":"Building 1"},{"id":"eq-2","name":"Camera Canon EOS","location":"Media Lab, Building 2"},{"id":"eq-3","name":"Meeting Room 301","location":"Building 3"}]
+
+==================================================================
+[PASS] 2. List bookings  (expected 200, got 200)
+$ curl http://localhost:8787/api/bookings
+------------------------------------------------------------------
+HTTP/1.1 200 OK
+Content-Length: 2
+Content-Type: application/json
+
+[]
+
+==================================================================
+[PASS] 3. Create a booking  (expected 201, got 201)
+$ curl -X POST http://localhost:8787/api/bookings -H Content-Type: application/json -d {
+  "equipmentId": "eq-1",
+  "borrowerName": "Somchai Jaidee",
+  "startAt": "2026-10-20T09:00:00.000Z",
+  "endAt": "2026-10-20T11:00:00.000Z",
+  "purpose": "Class presentation"
+}
+------------------------------------------------------------------
+HTTP/1.1 201 Created
+Content-Length: 240
+Content-Type: application/json
+
+{"id":"6a3506e3-ea81-4246-89c2-9ad52e3c9552","equipmentId":"eq-1","borrowerName":"Somchai Jaidee","startAt":"2026-10-20T09:00:00.000Z","endAt":"2026-10-20T11:00:00.000Z","purpose":"Class presentation","createdAt":"2026-10-06T07:12:52.660Z"}
+
+BOOKING_ID=6a3506e3-ea81-4246-89c2-9ad52e3c9552
+==================================================================
+[PASS] 4. Get one booking  (expected 200, got 200)
+$ curl http://localhost:8787/api/bookings/6a3506e3-ea81-4246-89c2-9ad52e3c9552
+------------------------------------------------------------------
+HTTP/1.1 200 OK
+Content-Length: 240
+Content-Type: application/json
+
+{"id":"6a3506e3-ea81-4246-89c2-9ad52e3c9552","equipmentId":"eq-1","borrowerName":"Somchai Jaidee","startAt":"2026-10-20T09:00:00.000Z","endAt":"2026-10-20T11:00:00.000Z","purpose":"Class presentation","createdAt":"2026-10-06T07:12:52.660Z"}
+
+==================================================================
+[PASS] 5. Update a booking  (expected 200, got 200)
+$ curl -X PATCH http://localhost:8787/api/bookings/6a3506e3-ea81-4246-89c2-9ad52e3c9552 -H Content-Type: application/json -d {
+  "equipmentId": "eq-1",
+  "borrowerName": "Somchai Jaidee",
+  "startAt": "2026-10-20T12:00:00.000Z",
+  "endAt": "2026-10-20T14:00:00.000Z",
+  "purpose": "Updated class presentation"
+}
+------------------------------------------------------------------
+HTTP/1.1 200 OK
+Content-Length: 248
+Content-Type: application/json
+
+{"id":"6a3506e3-ea81-4246-89c2-9ad52e3c9552","equipmentId":"eq-1","borrowerName":"Somchai Jaidee","startAt":"2026-10-20T12:00:00.000Z","endAt":"2026-10-20T14:00:00.000Z","purpose":"Updated class presentation","createdAt":"2026-10-06T07:12:52.660Z"}
+
+==================================================================
+[PASS] 6. Invalid time range  (expected 400, got 400)
+$ curl -X POST http://localhost:8787/api/bookings -H Content-Type: application/json -d {
+  "equipmentId": "eq-1",
+  "borrowerName": "Somchai Jaidee",
+  "startAt": "2026-10-21T11:00:00.000Z",
+  "endAt": "2026-10-21T09:00:00.000Z",
+  "purpose": "Invalid time range test"
+}
+------------------------------------------------------------------
+HTTP/1.1 400 Bad Request
+Content-Length: 40
+Content-Type: application/json
+
+{"error":"startAt must be before endAt"}
+
+==================================================================
+[PASS] 7. Overlapping booking  (expected 409, got 409)
+$ curl -X POST http://localhost:8787/api/bookings -H Content-Type: application/json -d {
+  "equipmentId": "eq-1",
+  "borrowerName": "Suda Dee",
+  "startAt": "2026-10-20T12:30:00.000Z",
+  "endAt": "2026-10-20T13:30:00.000Z",
+  "purpose": "Conflict test"
+}
+------------------------------------------------------------------
+HTTP/1.1 409 Conflict
+Content-Length: 68
+Content-Type: application/json
+
+{"error":"This equipment is already booked for an overlapping time"}
+
+==================================================================
+[PASS] 8. Missing booking  (expected 404, got 404)
+$ curl http://localhost:8787/api/bookings/not-found
+------------------------------------------------------------------
+HTTP/1.1 404 Not Found
+Content-Length: 29
+Content-Type: application/json
+
+{"error":"Booking not found"}
+
+==================================================================
+[PASS] E1. Back-to-back booking (14:00 start = previous end) is allowed  (expected 201, got 201)
+$ curl -X POST http://localhost:8787/api/bookings -H Content-Type: application/json -d {
+  "equipmentId": "eq-1", "borrowerName": "Suda Dee",
+  "startAt": "2026-10-20T14:00:00.000Z", "endAt": "2026-10-20T15:00:00.000Z", "purpose": "Back-to-back"
+}
+------------------------------------------------------------------
+HTTP/1.1 201 Created
+Content-Length: 228
+Content-Type: application/json
+
+{"id":"1bfc5152-50b2-4b86-a78f-0dabf1e49bb6","equipmentId":"eq-1","borrowerName":"Suda Dee","startAt":"2026-10-20T14:00:00.000Z","endAt":"2026-10-20T15:00:00.000Z","purpose":"Back-to-back","createdAt":"2026-10-06T07:12:56.452Z"}
+
+==================================================================
+[PASS] E2. PATCH that moves a booking onto another booking  (expected 409, got 409)
+$ curl -X PATCH http://localhost:8787/api/bookings/6a3506e3-ea81-4246-89c2-9ad52e3c9552 -H Content-Type: application/json -d {
+  "startAt": "2026-10-20T13:30:00.000Z", "endAt": "2026-10-20T14:30:00.000Z"
+}
+------------------------------------------------------------------
+HTTP/1.1 409 Conflict
+Content-Length: 68
+Content-Type: application/json
+
+{"error":"This equipment is already booked for an overlapping time"}
+
+==================================================================
+[PASS] E3. Same time, different equipment is allowed  (expected 201, got 201)
+$ curl -X POST http://localhost:8787/api/bookings -H Content-Type: application/json -d {
+  "equipmentId": "eq-2", "borrowerName": "Suda Dee",
+  "startAt": "2026-10-20T12:00:00.000Z", "endAt": "2026-10-20T14:00:00.000Z", "purpose": "Other equipment"
+}
+------------------------------------------------------------------
+HTTP/1.1 201 Created
+Content-Length: 231
+Content-Type: application/json
+
+{"id":"27b3e644-18bc-4eac-a645-e421d7ac857e","equipmentId":"eq-2","borrowerName":"Suda Dee","startAt":"2026-10-20T12:00:00.000Z","endAt":"2026-10-20T14:00:00.000Z","purpose":"Other equipment","createdAt":"2026-10-06T07:12:57.940Z"}
+
+==================================================================
+[PASS] E4. Unknown equipmentId  (expected 404, got 404)
+$ curl -X POST http://localhost:8787/api/bookings -H Content-Type: application/json -d {
+  "equipmentId": "eq-999", "borrowerName": "Somchai Jaidee",
+  "startAt": "2026-10-22T09:00:00.000Z", "endAt": "2026-10-22T10:00:00.000Z", "purpose": "Ghost"
+}
+------------------------------------------------------------------
+HTTP/1.1 404 Not Found
+Content-Length: 45
+Content-Type: application/json
+
+{"error":"Equipment 'eq-999' does not exist"}
+
+==================================================================
+[PASS] E5. Missing required fields  (expected 400, got 400)
+$ curl -X POST http://localhost:8787/api/bookings -H Content-Type: application/json -d { "equipmentId": "eq-1" }
+------------------------------------------------------------------
+HTTP/1.1 400 Bad Request
+Content-Length: 76
+Content-Type: application/json
+
+{"error":"Missing required field(s): borrowerName, startAt, endAt, purpose"}
+
+==================================================================
+[PASS] E6. Malformed JSON body  (expected 400, got 400)
+$ curl -X POST http://localhost:8787/api/bookings -H Content-Type: application/json -d {bad
+------------------------------------------------------------------
+HTTP/1.1 400 Bad Request
+Content-Length: 43
+Content-Type: application/json
+
+{"error":"Request body must be valid JSON"}
+
+==================================================================
+[PASS] E7. Wrong type (borrowerName is a number)  (expected 400, got 400)
+$ curl -X POST http://localhost:8787/api/bookings -H Content-Type: application/json -d {
+  "equipmentId": "eq-3", "borrowerName": 123,
+  "startAt": "2026-10-23T09:00:00.000Z", "endAt": "2026-10-23T10:00:00.000Z", "purpose": "Type check"
+}
+------------------------------------------------------------------
+HTTP/1.1 400 Bad Request
+Content-Length: 51
+Content-Type: application/json
+
+{"error":"borrowerName must be a non-empty string"}
+
+==================================================================
+[PASS] E8. Non-ISO date format  (expected 400, got 400)
+$ curl -X POST http://localhost:8787/api/bookings -H Content-Type: application/json -d {
+  "equipmentId": "eq-3", "borrowerName": "Somchai Jaidee",
+  "startAt": "10/24/2026 09:00", "endAt": "10/24/2026 10:00", "purpose": "Date format check"
+}
+------------------------------------------------------------------
+HTTP/1.1 400 Bad Request
+Content-Length: 94
+Content-Type: application/json
+
+{"error":"startAt must be an ISO-8601 date-time with timezone, e.g. 2026-10-20T09:00:00.000Z"}
+
+==================================================================
+[PASS] E9. Unknown route returns JSON  (expected 404, got 404)
+$ curl http://localhost:8787/api/nope
+------------------------------------------------------------------
+HTTP/1.1 404 Not Found
+Content-Length: 41
+Content-Type: application/json
+
+{"error":"Route GET /api/nope not found"}
+
+==================================================================
+[PASS] E11. Impossible calendar date (Feb 30)  (expected 400, got 400)
+$ curl -X POST http://localhost:8787/api/bookings -H Content-Type: application/json -d {
+  "equipmentId": "eq-3", "borrowerName": "Somchai Jaidee",
+  "startAt": "2026-02-30T09:00:00.000Z", "endAt": "2026-02-30T10:00:00.000Z", "purpose": "Date check"
+}
+------------------------------------------------------------------
+HTTP/1.1 400 Bad Request
+Content-Length: 47
+Content-Type: application/json
+
+{"error":"startAt is not a real calendar date"}
+
+==================================================================
+[PASS] E12. Whitespace-only borrowerName  (expected 400, got 400)
+$ curl -X POST http://localhost:8787/api/bookings -H Content-Type: application/json -d {
+  "equipmentId": "eq-3", "borrowerName": "   ",
+  "startAt": "2026-10-25T09:00:00.000Z", "endAt": "2026-10-25T10:00:00.000Z", "purpose": "Blank name"
+}
+------------------------------------------------------------------
+HTTP/1.1 400 Bad Request
+Content-Length: 51
+Content-Type: application/json
+
+{"error":"borrowerName must be a non-empty string"}
+
+==================================================================
+[PASS] E13. PATCH with no updatable fields  (expected 400, got 400)
+$ curl -X PATCH http://localhost:8787/api/bookings/6a3506e3-ea81-4246-89c2-9ad52e3c9552 -H Content-Type: application/json -d {}
+------------------------------------------------------------------
+HTTP/1.1 400 Bad Request
+Content-Length: 100
+Content-Type: application/json
+
+{"error":"Provide at least one field to update: equipmentId, borrowerName, startAt, endAt, purpose"}
+
+==================================================================
+[PASS] E14. PATCH only startAt, after the existing endAt (merged range invalid)  (expected 400, got 400)
+$ curl -X PATCH http://localhost:8787/api/bookings/6a3506e3-ea81-4246-89c2-9ad52e3c9552 -H Content-Type: application/json -d {
+  "startAt": "2026-10-20T15:00:00.000Z"
+}
+------------------------------------------------------------------
+HTTP/1.1 400 Bad Request
+Content-Length: 40
+Content-Type: application/json
+
+{"error":"startAt must be before endAt"}
+
+==================================================================
+[PASS] E15. PATCH a booking that does not exist  (expected 404, got 404)
+$ curl -X PATCH http://localhost:8787/api/bookings/not-found -H Content-Type: application/json -d { "purpose": "x" }
+------------------------------------------------------------------
+HTTP/1.1 404 Not Found
+Content-Length: 29
+Content-Type: application/json
+
+{"error":"Booking not found"}
+
+==================================================================
+[PASS] E16. DELETE a booking that does not exist  (expected 404, got 404)
+$ curl -X DELETE http://localhost:8787/api/bookings/not-found
+------------------------------------------------------------------
+HTTP/1.1 404 Not Found
+Content-Length: 29
+Content-Type: application/json
+
+{"error":"Booking not found"}
+
+==================================================================
+[PASS] E10. SQL injection attempt is treated as plain data  (expected 404, got 404)
+$ curl http://localhost:8787/api/bookings/x'%20OR%20'1'='1
+------------------------------------------------------------------
+HTTP/1.1 404 Not Found
+Content-Length: 29
+Content-Type: application/json
+
+{"error":"Booking not found"}
+
+==================================================================
+[PASS] 9. Delete a booking  (expected 204, got 204)
+$ curl -X DELETE http://localhost:8787/api/bookings/6a3506e3-ea81-4246-89c2-9ad52e3c9552
+------------------------------------------------------------------
+HTTP/1.1 204 No Content
+
+==================================================================
+[PASS] 9b. Get deleted booking  (expected 404, got 404)
+$ curl http://localhost:8787/api/bookings/6a3506e3-ea81-4246-89c2-9ad52e3c9552
+------------------------------------------------------------------
+HTTP/1.1 404 Not Found
+Content-Length: 29
+Content-Type: application/json
+
+{"error":"Booking not found"}
+
+==================================================================
+SUMMARY: 26 passed, 0 failed
