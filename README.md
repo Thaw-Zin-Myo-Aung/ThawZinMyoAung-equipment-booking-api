@@ -59,7 +59,7 @@ Results and screenshots: [TEST_EVIDENCE.md](TEST_EVIDENCE.md)
 
 - API contract, assumptions, status codes: [API_CONTRACT.md](API_CONTRACT.md)
 - Schema / ERD: [SCHEMA.md](SCHEMA.md)
-- Test evidence: [TEST_EVIDENCE.md](TEST_EVIDENCE.md)
+- Test evidence: [TEST_EVIDENCE.md](TEST_EVIDENCE.md) and [EVIDENCE.pdf](EVIDENCE.pdf) (all screenshots + results in one PDF)
 - Quality Gate review: [QUALITY_GATE_REVIEW.md](QUALITY_GATE_REVIEW.md)
 - AI usage log: [AI_LOG.md](AI_LOG.md)
 
