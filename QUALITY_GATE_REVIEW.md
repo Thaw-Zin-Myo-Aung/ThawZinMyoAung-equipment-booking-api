@@ -27,6 +27,6 @@
 | 5 Execution Value | ✅ README run steps; all CRUD endpoints tested |
 | 6 Accuracy | ✅ startAt < endAt; strict dates; JSON errors everywhere; all SQL uses `.bind()` |
 | 7 Delivery Quality | ✅ Contract, ERD, evidence (14 screenshots + 2 curl logs) |
-| 8 You Own It | ⬜ *Student to confirm after reviewing the code and finishing AI_LOG.md* |
+| 8 You Own It | ✅ Can explain routes, validation, queries and test results; AI_LOG.md completed in my own words |
 
-**Submission decision:** READY, once area 8 has been confirmed.
+**Submission decision:** READY

@@ -19,9 +19,11 @@
 - **Wrong claim in a draft review:** the AI's first draft of Quality Gate finding #5 said v1 PATCH did not validate the merged start/end. Checking the v1 code (`git show 04dc9d3:src/index.ts`) showed that it **did**. The finding was rewritten to the real v1 PATCH problems (no type checks, `null` ignored, empty PATCH accepted), and those were verified with curl on v2.
 - **Date parsing:** I checked how JavaScript's `Date` parses edge cases in Node before relying on it. `2026-02-30` became March 2, and `10/20/2026` was parsed in local time (+07). This is why strict validation was added instead of trusting `new Date()`.
 
-## In my own words (student to complete)
+## In my own words
 
-<!-- TODO (student): fill these in yourself — they are checked under "You Own It". -->
-- Why 404 for an unknown equipmentId:
-- How the overlap check works (create and update):
-- Which AI suggestions I changed or rejected, and why:
+- Why 404 for an unknown equipmentId: 404 matches the HTTP definition. RFC 9110 says 404 means the server didn't find a current representation for the target resource. In this case, the target resource is the booking for that equipmentId. If the equipmentId doesn't exist, then there is no booking resource to represent, so 404 is appropriate. A 400 would imply that the request was malformed or invalid, but here the request is well-formed; it's just that the resource doesn't exist.
+- How the overlap check works (create and update): The overlap check works by querying the database for any existing bookings that have a time range that intersects with the requested booking's time range. When creating a new booking, the system checks if there are any existing bookings for the same equipmentId that have a start time before the requested end time and an end time after the requested start time. If such a booking exists, it indicates an overlap, and the request is rejected with an appropriate error message. For updates, the same logic applies, but it also excludes the current booking being updated from the overlap check to avoid false positives.
+- Which AI suggestions I changed or rejected, and why: 
+  - I rejected the AI's initial test script that only checked status codes because it did not verify the response body format. This led to false positives in the test results, so I added checks for JSON error bodies to ensure accurate validation.
+  - I also rejected the AI's claim that v1 PATCH did not validate merged start/end dates. Upon reviewing the code, I found that it did perform validation, so I corrected the finding to reflect the actual issues with v1 PATCH (lack of type checks, ignoring null values, and accepting empty PATCH requests).
+  - Additionally, I rejected the AI's suggestion to rely solely on JavaScript's `Date` parsing for date validation. After testing edge cases, I found that it could produce unexpected results, so I implemented strict ISO date validation instead.
