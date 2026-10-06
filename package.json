@@ -1,0 +1,26 @@
+{
+  "name": "equipment-booking-api",
+  "version": "1.0.0",
+  "description": "Campus Equipment Booking API (Hono + D1)",
+  "scripts": {
+    "db:migrate": "wrangler d1 migrations apply booking-db --local",
+    "dev": "wrangler dev --port 8787",
+    "typecheck": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "hono": "^4.13.13"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261006.1",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.147.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "workerd@1.20261001.1": true
+  }
+}
