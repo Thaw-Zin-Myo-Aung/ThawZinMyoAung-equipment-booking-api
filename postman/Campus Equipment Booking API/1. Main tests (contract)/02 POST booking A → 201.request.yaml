@@ -1,0 +1,26 @@
+$kind: http-request
+url: "{{baseUrl}}/bookings"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "equipmentId": "eq-1",
+      "borrowerName": "Somchai Jaidee",
+      "startAt": "2026-10-20T09:00:00.000Z",
+      "endAt": "2026-10-20T11:00:00.000Z",
+      "purpose": "Class presentation"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 201", () => pm.response.to.have.status(201));
+      pm.test("Has all booking fields", () => {
+        const j = pm.response.json();
+        ["id","equipmentId","borrowerName","startAt","endAt","purpose"].forEach(k => pm.expect(j).to.have.property(k));
+      });
+      pm.collectionVariables.set("bookingId", pm.response.json().id);
+    language: text/javascript
+order: 2000

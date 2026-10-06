@@ -1,0 +1,27 @@
+$kind: http-request
+url: "{{baseUrl}}/bookings"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "equipmentId": "eq-2",
+      "borrowerName": 123,
+      "startAt": "2026-10-23T09:00:00.000Z",
+      "endAt": "2026-10-23T10:00:00.000Z",
+      "purpose": "Type check"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      if (pm.response.code === 201) pm.collectionVariables.set("probeId", pm.response.json().id);
+      pm.test("Status is 400", () => pm.response.to.have.status(400));
+      pm.test("Error body is JSON { error: string }", () => {
+        const j = pm.response.json();
+        pm.expect(j).to.have.property("error");
+        pm.expect(j.error).to.be.a("string");
+      });
+    language: text/javascript
+order: 3000

@@ -1,13 +1,16 @@
 # Test Evidence
 
-**Base URLs used for testing:**
-- Local: `http://localhost:8787/api` (`wrangler dev`, local D1). Used for the Postman screenshots and the before/after runs.
-- **Live: `https://equipment-booking-api.platformdev.workers.dev/api`** (Cloudflare Workers + remote D1). Full curl suite: **26 passed, 0 failed**, see [evidence/deployed_cloudflare.txt](evidence/deployed_cloudflare.txt).
+**Base URL used for the evidence: `https://equipment-booking-api.platformdev.workers.dev/api`** (Cloudflare Workers + remote D1)
+
+- All screenshots in section 1 were taken against this **live** URL, with the Postman environment **"Booking API - Cloudflare (live)"**. The URL is shown in the `{{baseUrl}}` tooltip or in the environment name at the top right.
+- Full curl suite against the live URL: **26 passed, 0 failed**, see [evidence/deployed_cloudflare.txt](evidence/deployed_cloudflare.txt).
+- Development and the before/after Quality Gate comparison used the local server `http://localhost:8787/api` (section 2). The earlier localhost screenshots are kept in [evidence/screenshots/local/](evidence/screenshots/local/).
+
 **Tools:** Postman (collection in [postman/](postman/)) and `curl` (script [tests/run_tests.sh](tests/run_tests.sh), based on the cURL Quick Test Guide)
 
-## 1. Postman screenshots (v2)
+## 1. Postman screenshots (v2, live Cloudflare URL)
 
-**Full collection run (Postman Runner, environment "Booking API - Local"): 34 tests, 0 failed, 0 errors.** The probe-cleanup request was skipped because #17 correctly did not create a booking.
+**Full collection run (Postman Runner, environment "Booking API - Cloudflare (live)"): 34 tests, 0 failed, 0 errors.** The probe-cleanup request was skipped because #17 correctly did not create a booking.
 Screenshot: [00-collection-run-34-passed.png](evidence/screenshots/00-collection-run-34-passed.png)
 
 Individual requests:
@@ -18,10 +21,11 @@ Individual requests:
 | 02 | **Create** booking | `POST /bookings` | 201 | 201 ✅ | [02-create-201.png](evidence/screenshots/02-create-201.png) |
 | 04 | **Read** one booking | `GET /bookings/:id` | 200 | 200 ✅ | [04-get-by-id-200.png](evidence/screenshots/04-get-by-id-200.png) |
 | 05 | **Conflict** on create (10:00–12:00 vs 09:00–11:00) | `POST /bookings` | 409 | 409 ✅ | [05-overlap-409.png](evidence/screenshots/05-overlap-409.png) |
+| 06 | Back-to-back booking (starts exactly when A ends) is allowed | `POST /bookings` | 201 | 201 ✅ | [06-back-to-back-201.png](evidence/screenshots/06-back-to-back-201.png) |
 | 07 | **Invalid input**: startAt after endAt | `POST /bookings` | 400 | 400 ✅ | [07-invalid-range-400.png](evidence/screenshots/07-invalid-range-400.png) |
 | 09 | equipmentId does not exist | `POST /bookings` | 404 | 404 ✅ | [09-unknown-equipment-404.png](evidence/screenshots/09-unknown-equipment-404.png) |
 | 10 | **Update** (partial, purpose only) | `PATCH /bookings/:id` | 200 | 200 ✅ | [10-patch-purpose-200.png](evidence/screenshots/10-patch-purpose-200.png) |
-| 11a | Update overlapping only its **own** old time is not a conflict | `PATCH /bookings/:id` | 200 | 200 ✅ | [11a-patch-self-not-conflict-200.png](evidence/screenshots/11a-patch-self-not-conflict-200.png) |
+| 11a | Update overlapping only its **own** old time is not a conflict (run after C was deleted; this request's scripted tests expect the 409 case, so they show 0/2 here) | `PATCH /bookings/:id` | 200 | 200 ✅ | [11a-patch-self-not-conflict-200.png](evidence/screenshots/11a-patch-self-not-conflict-200.png) |
 | 11 | **Conflict** on update (move A onto C) | `PATCH /bookings/:id` | 409 | 409 ✅ | [11-patch-overlap-409.png](evidence/screenshots/11-patch-overlap-409.png) |
 | 12 | **Delete** | `DELETE /bookings/:id` | 204 | 204 ✅ | [12-delete-204.png](evidence/screenshots/12-delete-204.png) |
 | 13 | **Not found** after delete | `GET /bookings/:id` | 404 | 404 ✅ | [13-get-deleted-404.png](evidence/screenshots/13-get-deleted-404.png) |

@@ -1,0 +1,7 @@
+$kind: collection
+description: "Run the whole collection in order (Run collection). Booking ids are captured automatically. Folder 2 = Quality Gate probes: these are expected to FAIL on v1 and PASS after the fixes."
+variables:
+  baseUrl: http://localhost:8787/api
+  bookingId: ""
+  bookingCId: ""
+  probeId: ""

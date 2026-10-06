@@ -1,0 +1,26 @@
+$kind: http-request
+url: "{{baseUrl}}/bookings"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "equipmentId": "eq-1",
+      "borrowerName": "Somchai Jaidee",
+      "startAt": "2026-10-21T12:00:00.000Z",
+      "endAt": "2026-10-21T10:00:00.000Z",
+      "purpose": "Invalid range"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 400", () => pm.response.to.have.status(400));
+      pm.test("Error body is JSON { error: string }", () => {
+        const j = pm.response.json();
+        pm.expect(j).to.have.property("error");
+        pm.expect(j.error).to.be.a("string");
+      });
+    language: text/javascript
+order: 7000

@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/bookings/{{bookingId}}"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "purpose": "Updated: final project demo"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 200", () => pm.response.to.have.status(200));
+      pm.test("Purpose changed, times unchanged", () => {
+        const j = pm.response.json();
+        pm.expect(j.purpose).to.eql("Updated: final project demo");
+        pm.expect(j.startAt).to.eql("2026-10-20T09:00:00.000Z");
+        pm.expect(j.endAt).to.eql("2026-10-20T11:00:00.000Z");
+      });
+    language: text/javascript
+order: 10000
